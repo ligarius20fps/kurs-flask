@@ -1,0 +1,9 @@
+#!/bin/bash
+sudo docker run \
+  --rm \
+  --name kontener \
+  -d \
+  -p 5000:5000 \
+  -w /app \
+  -v "$(pwd)/app:/app" \
+  rest-api
