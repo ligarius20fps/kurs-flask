@@ -31,12 +31,17 @@ def get_store(store_id):
     try:
         return stores[store_id]
     except KeyError:
-        abort(404, message=f"Store with ID {store_id} not found")
+        abort(404, message=f"Store not found")
 
 
 @app.delete("/store/<string:store_id>")
 def delete_store(store_id):
-    pass
+    # shouldn't we also delete items in the deleted store?
+    try:
+        del stores[store_id]
+        return {"message": "Store deleted"}
+    except KeyError:
+        abort(404, message=f"Store not found")
 
 
 @app.post("/item")
@@ -77,8 +82,15 @@ def get_item(item_id):
 @app.put("/item/<string:item_id>")
 def update_item(item_id):
     req = request.get_json()
-    if "item_id" not in stores.keys():
+    fields = {"name", "price"}
+    if fields & req.keys() == set():
+        return abort(400, message="Bad Request. 'name' or 'price' should be included in the JSON payload.")
+    if item_id not in items.keys():
         abort(404, message=f"Item not found")
+    for field in fields:
+        if field in req.keys():
+            items[item_id][field] = req[field]
+    return items[item_id]
 
 
 @app.delete("/item/<string:item_id>")
