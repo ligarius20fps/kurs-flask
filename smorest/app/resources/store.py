@@ -3,17 +3,15 @@ from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import stores
+from schemas import StoreSchema
 
 blp = Blueprint("Stores", __name__, description="Operations on stores")
 
 
 @blp.route("/store")
 class Store(MethodView):
-    def post(self):
-        req = request.get_json()
-        # name – string
-        if {"name"} != req.keys():
-            return abort(400, message="Bad Request. Only 'name' should be included in the JSON payload.")
+    @blp.arguments(StoreSchema)
+    def post(self, req):
         for store in stores.values():
             if store["name"] == req["name"]:
                 return abort(400, message="Bad Request. The store already exists.")

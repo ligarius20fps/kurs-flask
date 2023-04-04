@@ -4,20 +4,15 @@ from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import items, stores
+from schemas import ItemSchema, ItemUpdateSchema
 
 blp = Blueprint("Items", __name__, description="Operations on items")
 
 
 @blp.route("/item")
 class Item(MethodView):
-    def post(self):
-        req = request.get_json()
-        # name – string
-        # price – float.2
-        # store_id – uuid
-        if {"name", "price", "store_id"} != req.keys():
-            return abort(400, message="Bad Request. "
-                                      "Only 'name', 'price' and 'store_id' should be included in the JSON payload.")
+    @blp.arguments(ItemSchema)
+    def post(self, req):
         store_id = req["store_id"]
         for item in items.values():
             if (item["name"] == req["name"] and
@@ -42,14 +37,11 @@ class ItemID(MethodView):
         except KeyError:
             abort(404, message=f"Item not found")
 
-    def put(self, item_id):
-        req = request.get_json()
-        fields = {"name", "price"}
-        if fields & req.keys() == set():
-            return abort(400, message="Bad Request. 'name' or 'price' should be included in the JSON payload.")
+    @blp.arguments(ItemUpdateSchema)
+    def put(self, req, item_id):
         if item_id not in items.keys():
             abort(404, message=f"Item not found")
-        for field in fields:
+        for field in {"name", "price"}:
             if field in req.keys():
                 items[item_id][field] = req[field]
         return items[item_id]
