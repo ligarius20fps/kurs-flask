@@ -1,2 +1,0 @@
-#!/bin/bash
-sudo docker run --rm --name kontener -dp 5000:5000 rest-api
