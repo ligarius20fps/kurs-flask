@@ -24,31 +24,23 @@ class Item(MethodView):
 
     @blp.response(200, ItemSchema(many=True))
     def get(self):  # http://127.0.0.1:5000/item
-        return items.values()
+        raise NotImplementedError
 
 
 @blp.route("/item/<string:item_id>")
 class ItemID(MethodView):
     @blp.response(200, ItemSchema)
     def get(self, item_id):
-        try:
-            return items[item_id]
-        except KeyError:
-            abort(404, message=f"Item not found")
+        item = ItemModel.query.get_or_404(item_id)
+        return item
 
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     def put(self, req, item_id):
-        if item_id not in items.keys():
-            abort(404, message=f"Item not found")
-        for field in {"name", "price"}:
-            if field in req.keys():
-                items[item_id][field] = req[field]
-        return items[item_id]
+        raise NotImplementedError
 
     def delete(self, item_id):
-        try:
-            del items[item_id]
-            return {"message": "Item deleted"}
-        except KeyError:
-            abort(404, message=f"Item not found")
+        item = ItemModel.query.get_or_404(item_id)
+        db.session.delete(item)
+        db.session.commit()
+        return {"message": "Item successfully deleted"}

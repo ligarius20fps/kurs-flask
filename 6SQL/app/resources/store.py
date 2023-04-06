@@ -26,21 +26,18 @@ class Store(MethodView):
 
     @blp.response(200, StoreSchema(many=True))
     def get(self):  # http://127.0.0.1:5000/store
-        return stores.values()
+        raise NotImplementedError
 
 
 @blp.route("/store/<string:store_id>")
 class StoreID(MethodView):
     @blp.response(200, StoreSchema)
     def get(self, store_id):
-        try:
-            return stores[store_id]
-        except KeyError:
-            abort(404, message=f"Store not found")
+        store = StoreModel.query.get_or_404(store_id)
+        return store
 
     def delete(self, store_id):
-        try:
-            del stores[store_id]
-            return {"message": "Store deleted"}
-        except KeyError:
-            abort(404, message=f"Store not found")
+        store = StoreModel.query.get_or_404(store_id)
+        db.session.delete(store)
+        db.session.commit()
+        return {"message": "Store successfully deleted"}
