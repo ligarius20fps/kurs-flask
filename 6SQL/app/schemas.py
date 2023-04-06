@@ -13,7 +13,7 @@ class PlainStoreSchema(Schema):
 
 
 class ItemSchema(PlainItemSchema):
-    store_id = fields.Str(required=True, load_only=True)
+    store_id = fields.Integer(required=True, load_only=True)
     store = fields.Nested(PlainStoreSchema(), dump_only=True)
 
 
