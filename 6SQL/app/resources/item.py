@@ -24,7 +24,7 @@ class Item(MethodView):
 
     @blp.response(200, ItemSchema(many=True))
     def get(self):  # http://127.0.0.1:5000/item
-        raise NotImplementedError
+        return ItemModel.query.all()
 
 
 @blp.route("/item/<string:item_id>")
@@ -37,7 +37,18 @@ class ItemID(MethodView):
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     def put(self, req, item_id):
-        raise NotImplementedError
+        item = ItemModel.query.get(item_id)
+        if item:
+            item.price = req["price"]
+            item.name = req["name"]
+        else:
+            item = ItemModel(id=item_id, **req)
+        try:
+            db.session.add(item)
+            db.session.commit()
+        except SQLAlchemyError:
+            abort(500, message="An error occured")
+        return item
 
     def delete(self, item_id):
         item = ItemModel.query.get_or_404(item_id)
