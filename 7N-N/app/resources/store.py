@@ -41,6 +41,6 @@ class StoreID(MethodView):
         try:
             db.session.delete(store)
             db.session.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
             abort(500, message="An error occured")
         return {"message": "Store successfully deleted"}
