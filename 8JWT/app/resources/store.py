@@ -11,7 +11,14 @@ blp = Blueprint("Stores", __name__, description="Operations on stores")
 @blp.route("/store")
 class Store(MethodView):
     @blp.arguments(StoreSchema)
-    @blp.response(201, StoreSchema)
+    @blp.response(201, StoreSchema,description="Adds a store with a unique name")
+    @blp.alt_response(400, description="Returned if store name already exists in the database",
+                      example={
+                        "code": 400,
+                        "message": "The store already exists",
+                        "status": "Bad Request"
+                        })
+    @blp.alt_response(500, description="Returned if there is an error in the database")
     def post(self, req):
         new_store = StoreModel(**req)
         try:
@@ -19,22 +26,33 @@ class Store(MethodView):
             db.session.commit()
         except IntegrityError:
             abort(400, message="The store already exists")
-        except SQLAlchemyError:
-            abort(500, message="An error occured")
+        except SQLAlchemyError as e:
+            abort(500, message=str(e))
         return new_store, 201
 
-    @blp.response(200, StoreSchema(many=True))
+    @blp.response(200, StoreSchema(many=True), description="Returns all stores in the database")
     def get(self):  # http://127.0.0.1:5000/store
         return StoreModel.query.all()
 
 
 @blp.route("/store/<string:store_id>")
 class StoreID(MethodView):
-    @blp.response(200, StoreSchema)
+    @blp.response(200, StoreSchema, description="Returns a store with provided ID")
+    @blp.alt_response(404, description="Returned if no store found with such ID",
+                      example={
+                        "code": 404,
+                        "status": "Not Found"
+                    })
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
         return store
 
+    @blp.response(200, description="Deletes a store with provided ID", example={"message": "Store successfully deleted"})
+    @blp.alt_response(404, description="Returned if no store found with such ID",
+                      example={
+                          "code": 404,
+                          "status": "Not Found"
+                      })
     def delete(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
         try:
