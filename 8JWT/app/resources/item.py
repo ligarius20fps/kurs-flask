@@ -28,7 +28,7 @@ class Item(MethodView):
         return ItemModel.query.all()
 
 
-@blp.route("/item/<string:item_id>")
+@blp.route("/item/<int:item_id>")
 class ItemID(MethodView):
     @blp.response(200, ItemSchema, description="Returns an item with provided ID")
     @blp.alt_response(404, description="Returned if no item found with such ID",

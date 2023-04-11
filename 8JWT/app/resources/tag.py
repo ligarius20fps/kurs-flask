@@ -8,7 +8,7 @@ from schemas import TagSchema, ItemAndTagSchema
 blp = Blueprint("Tags", __name__, description="Operations on tags")
 
 
-@blp.route("/store/<string:store_id>/tag")
+@blp.route("/store/<int:store_id>/tag")
 class TagStoreID(MethodView):
     @blp.arguments(TagSchema)
     @blp.response(201, TagSchema, description="Adds a tag to the store with provided ID")
@@ -33,7 +33,7 @@ class TagStoreID(MethodView):
         return store.tags.all()
 
 
-@blp.route("/tag/<string:tag_id>")
+@blp.route("/tag/<int:tag_id>")
 class TagID(MethodView):
     @blp.response(200, TagSchema, description="Returns a tag with provided ID")
     @blp.alt_response(404, description="Returned if no tag found with such ID",
@@ -66,7 +66,7 @@ class TagID(MethodView):
         return {"message": "Tag successfully deleted"}
 
 
-@blp.route("/item/<string:item_id>/tag/<string:tag_id>")
+@blp.route("/item/<int:item_id>/tag/<int:tag_id>")
 class ItemIDTagId(MethodView):
     @blp.response(200, TagSchema, description="Links item with tag, both identified by ID")
     @blp.alt_response(400, description="Returned if item and tag do not belong to the same store",

@@ -35,7 +35,7 @@ class Store(MethodView):
         return StoreModel.query.all()
 
 
-@blp.route("/store/<string:store_id>")
+@blp.route("/store/<int:store_id>")
 class StoreID(MethodView):
     @blp.response(200, StoreSchema, description="Returns a store with provided ID")
     @blp.alt_response(404, description="Returned if no store found with such ID",
