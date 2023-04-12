@@ -4,7 +4,7 @@ from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from db import db
 from passlib.hash import pbkdf2_sha256
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt, get_jwt_identity
 from blocklist import BLOCKLIST
 from models import UserModel
 from schemas import UserSchema
@@ -36,8 +36,9 @@ class UserLogin(MethodView):
             UserModel.username == req["username"]
         ).first()
         if user and pbkdf2_sha256.verify(req["password"], user.password):
-            access_token = create_access_token(identity=user.id)
-            return {"access_token": access_token}
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(identity=user.id)
+            return {"access_token": access_token, "refresh_token": refresh_token}
         abort(401, message="Invalid credentials")
 
 
@@ -51,7 +52,7 @@ class UserID(MethodView):
             abort(401, message="Admin privilege required")
         return UserModel.query.get_or_404(user_id)
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(200)
     def delete(self, user_id):
         jwt = get_jwt()
@@ -76,7 +77,11 @@ class LogoutUser(MethodView):
 
 @blp.route("/refresh")
 class RefreshToken(MethodView):
-    @jwt_required()
+    @jwt_required(refresh=True)
     @blp.response(200)
     def post(self):
-        pass
+        identity = get_jwt_identity()
+        nonfresh_access_token = create_access_token(identity=identity, fresh=False)
+        jti = get_jwt()["jti"]
+        BLOCKLIST.add(jti)
+        return {"access_token": nonfresh_access_token}

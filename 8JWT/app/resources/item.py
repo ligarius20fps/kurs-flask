@@ -59,7 +59,7 @@ class ItemID(MethodView):
             abort(500, message=str(e))
         return item
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(200, description="Deletes an item with provided ID", example={"message": "Item successfully deleted"})
     @blp.alt_response(404, description="Returned if no item found with such ID",
                       example={

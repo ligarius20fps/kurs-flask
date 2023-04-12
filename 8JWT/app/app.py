@@ -38,6 +38,13 @@ def create_app(db_url=None):
     def check_if_token_in_blocklist(header, payload):
         return payload["jti"] in BLOCKLIST
 
+    @jwt.needs_fresh_token_loader
+    def nonfresh_token(header, payload):
+        return jsonify({
+            "message": "The access token must be refreshed",
+            "error": "nonfresh_token"
+        })
+
     @jwt.revoked_token_loader
     def token_revoked(header, payload):
         return jsonify({

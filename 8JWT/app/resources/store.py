@@ -49,7 +49,7 @@ class StoreID(MethodView):
         store = StoreModel.query.get_or_404(store_id)
         return store
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(200, description="Deletes a store with provided ID", example={"message": "Store successfully deleted"})
     @blp.alt_response(404, description="Returned if no store found with such ID",
                       example={

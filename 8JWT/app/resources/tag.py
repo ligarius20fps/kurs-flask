@@ -46,7 +46,7 @@ class TagID(MethodView):
     def get(self, tag_id):
         return TagModel.query.get_or_404(tag_id)
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(200, description="Deletes a tag with no items associated with it",
                   example={"message": "Tag successfully deleted"})
     @blp.alt_response(400, description="Returned if attempted to delete a tag that has items associated with it",
@@ -98,7 +98,7 @@ class ItemIDTagId(MethodView):
             abort(500, message=str(e))
         return tag
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     @blp.response(200, ItemAndTagSchema, description="Unlinks tag from the item, both identified by ID")
     @blp.alt_response(400, description="Returned if item and tag are not linked",
                       example={
