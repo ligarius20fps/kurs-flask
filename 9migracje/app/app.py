@@ -8,6 +8,7 @@ from resources.item import blp as ItemBlueprint
 from resources.tag import blp as TagBlueprint
 from resources.user import blp as UserBlueprint
 from blocklist import BLOCKLIST
+from flask_migrate import Migrate
 
 def create_app(db_url=None):
     app = Flask(__name__)
@@ -26,6 +27,7 @@ def create_app(db_url=None):
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 10 * 60 # https://flask-jwt-extended.readthedocs.io/en/stable/options/#JWT_ACCESS_TOKEN_EXPIRES
 
     db.init_app(app)
+    migrate = Migrate(app=app, db=db)
     api = Api(app)
 
     jwt = JWTManager(app)
@@ -75,8 +77,6 @@ def create_app(db_url=None):
             "reason": reason
         }), 401
 
-    with app.app_context():
-        db.create_all()
 
     api.register_blueprint(StoreBlueprint)
     api.register_blueprint(ItemBlueprint)
