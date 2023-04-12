@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
-
+from flask_jwt_extended import jwt_required
 from db import db
 from models import ItemModel
 from schemas import ItemSchema, ItemUpdateSchema
@@ -11,6 +11,7 @@ blp = Blueprint("Items", __name__, description="Operations on items")
 
 @blp.route("/item")
 class Item(MethodView):
+    @jwt_required()
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema, description="Adds an item")
     @blp.alt_response(500, description="Returned if there is an error in the database")
@@ -40,6 +41,7 @@ class ItemID(MethodView):
         item = ItemModel.query.get_or_404(item_id)
         return item
 
+    @jwt_required()
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema, description="Creates or updates an item in the database")
     @blp.alt_response(500, description="Returned if there is an error in the database")
@@ -57,6 +59,7 @@ class ItemID(MethodView):
             abort(500, message=str(e))
         return item
 
+    @jwt_required()
     @blp.response(200, description="Deletes an item with provided ID", example={"message": "Item successfully deleted"})
     @blp.alt_response(404, description="Returned if no item found with such ID",
                       example={

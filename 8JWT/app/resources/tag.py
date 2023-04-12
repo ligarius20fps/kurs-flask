@@ -1,4 +1,5 @@
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
 from db import db
@@ -10,6 +11,7 @@ blp = Blueprint("Tags", __name__, description="Operations on tags")
 
 @blp.route("/store/<int:store_id>/tag")
 class TagStoreID(MethodView):
+    @jwt_required()
     @blp.arguments(TagSchema)
     @blp.response(201, TagSchema, description="Adds a tag to the store with provided ID")
     @blp.alt_response(500, description="Returned if there is an error in the database")
@@ -44,6 +46,7 @@ class TagID(MethodView):
     def get(self, tag_id):
         return TagModel.query.get_or_404(tag_id)
 
+    @jwt_required()
     @blp.response(200, description="Deletes a tag with no items associated with it",
                   example={"message": "Tag successfully deleted"})
     @blp.alt_response(400, description="Returned if attempted to delete a tag that has items associated with it",
@@ -68,6 +71,7 @@ class TagID(MethodView):
 
 @blp.route("/item/<int:item_id>/tag/<int:tag_id>")
 class ItemIDTagId(MethodView):
+    @jwt_required()
     @blp.response(200, TagSchema, description="Links item with tag, both identified by ID")
     @blp.alt_response(400, description="Returned if item and tag do not belong to the same store",
                       example={
@@ -94,6 +98,7 @@ class ItemIDTagId(MethodView):
             abort(500, message=str(e))
         return tag
 
+    @jwt_required()
     @blp.response(200, ItemAndTagSchema, description="Unlinks tag from the item, both identified by ID")
     @blp.alt_response(400, description="Returned if item and tag are not linked",
                       example={

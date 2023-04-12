@@ -1,6 +1,7 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from flask_jwt_extended import jwt_required
 from db import db
 from schemas import StoreSchema
 from models import StoreModel
@@ -10,6 +11,7 @@ blp = Blueprint("Stores", __name__, description="Operations on stores")
 
 @blp.route("/store")
 class Store(MethodView):
+    @jwt_required()
     @blp.arguments(StoreSchema)
     @blp.response(201, StoreSchema,description="Adds a store with a unique name")
     @blp.alt_response(400, description="Returned if store name already exists in the database",
@@ -47,6 +49,7 @@ class StoreID(MethodView):
         store = StoreModel.query.get_or_404(store_id)
         return store
 
+    @jwt_required()
     @blp.response(200, description="Deletes a store with provided ID", example={"message": "Store successfully deleted"})
     @blp.alt_response(404, description="Returned if no store found with such ID",
                       example={

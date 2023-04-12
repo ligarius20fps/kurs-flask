@@ -1,9 +1,8 @@
 from os import getenv
 from flask_jwt_extended import JWTManager
-from flask import Flask
+from flask import Flask, jsonify
 from flask_smorest import Api
 from db import db
-# import models
 from resources.store import blp as StoreBlueprint
 from resources.item import blp as ItemBlueprint
 from resources.tag import blp as TagBlueprint
@@ -29,6 +28,29 @@ def create_app(db_url=None):
     api = Api(app)
 
     jwt = JWTManager(app)
+
+    @jwt.expired_token_loader
+    def token_expired(header, payload):
+        return jsonify({
+            "message": "The token has expired",
+            "error": "token_expired"
+        }), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token(reason):
+        return jsonify({
+            "message": "The token is invalid",
+            "error": "invalid_token",
+            "reason": reason
+        }), 400
+
+    @jwt.unauthorized_loader
+    def unauthorirzed(reason):
+        return jsonify({
+            "message": "Request does not contain an access token",
+            "error": "unauthorised",
+            "reason": reason
+        }), 401
 
     with app.app_context():
         db.create_all()
