@@ -3,6 +3,7 @@ from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from db import db
 from passlib.hash import pbkdf2_sha256
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 from models import UserModel
 from schemas import UserSchema
@@ -24,6 +25,20 @@ class RegisterUser(MethodView):
         except SQLAlchemyError as e:
             abort(500, message=e)
         return {"message": "Successfully created a user"}
+
+@blp.route("/login")
+class UserLogin(MethodView):
+    @blp.arguments(UserSchema)
+    @blp.response(200)
+    def post(self, req):
+        user = UserModel.query.filter(
+            UserModel.username == req["username"]
+        ).first()
+        if user and pbkdf2_sha256.verify(req["password"], user.password):
+            access_token = create_access_token(identity=user.id)
+            return {"access_token": access_token}
+        abort(401, message="Invalid credentials")
+
 
 @blp.route("/user/<int:user_id>")
 class UserID(MethodView):

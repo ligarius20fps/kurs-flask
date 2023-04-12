@@ -22,7 +22,8 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or getenv("DATABASE_URL", "sqlite:///data.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    app.config["JWT_SECRET_KEY"] = "slabe_haslo"
+    app.config["JWT_SECRET_KEY"] = "słabe_hasło"
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 10 * 60 # https://flask-jwt-extended.readthedocs.io/en/stable/options/#JWT_ACCESS_TOKEN_EXPIRES
 
     db.init_app(app)
     api = Api(app)
