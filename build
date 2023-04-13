@@ -1,0 +1,3 @@
+#!/bin/bash
+#script for building the image
+sudo docker build -t rest-api .
