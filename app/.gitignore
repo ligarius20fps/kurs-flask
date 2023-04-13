@@ -1,5 +1,6 @@
-/.venv/
-/.idea/
-/app/__pycache__/
-/app/models/__pycache__/
-/app/resources/__pycache__/
+.venv/
+.idea/
+app/__pycache__/
+app/models/__pycache__/
+app/resources/__pycache__/
+.env
