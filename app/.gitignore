@@ -1,6 +1,6 @@
 .venv/
 .idea/
-app/__pycache__/
-app/models/__pycache__/
-app/resources/__pycache__/
+__pycache__/
+models/__pycache__/
+resources/__pycache__/
 .env
