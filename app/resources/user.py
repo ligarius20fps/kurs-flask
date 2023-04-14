@@ -28,7 +28,8 @@ class RegisterUser(MethodView):
             abort(409, message="User with such username or email already exists")
         except SQLAlchemyError as e:
             abort(500, message=e)
-        current_app.queue.enqueue(send_registration_message, new_user.email, new_user.username)
+        #current_app.queue.enqueue(send_registration_message, new_user.email, new_user.username)
+        send_registration_message(new_user.email, new_user.username)
         return {"message": "Successfully created a user"}
 
 @blp.route("/login")
