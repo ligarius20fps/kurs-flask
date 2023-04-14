@@ -1,3 +1,6 @@
+import os
+
+import requests
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 from flask_smorest import Blueprint, abort
@@ -10,6 +13,16 @@ from models import UserModel
 from schemas import UserSchema
 
 blp = Blueprint("Users", __name__, description="Operations on users")
+
+def send_simple_message(to, subject, body):
+    domain = os.getenv("MAILGUN_DOMAIN")
+    return requests.post(
+		f"https://api.mailgun.net/v3/{domain}/messages",
+		auth=("api", os.getenv("MAILGUN_API_KEY")),
+		data={"from": f"mati <mailgun@{domain}>",
+			"to": [to],
+			"subject": subject,
+			"text": body})
 
 @blp.route("/register")
 class RegisterUser(MethodView):
