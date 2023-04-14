@@ -10,7 +10,7 @@ from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt, get_jwt_identity
 from blocklist import BLOCKLIST
 from models import UserModel
-from schemas import UserSchema
+from schemas import UserSchema, UserRegisterSchema
 
 blp = Blueprint("Users", __name__, description="Operations on users")
 
@@ -26,7 +26,7 @@ def send_simple_message(to, subject, body):
 
 @blp.route("/register")
 class RegisterUser(MethodView):
-    @blp.arguments(UserSchema)
+    @blp.arguments(UserRegisterSchema)
     @blp.response(200)
     def post(self, req):
         new_user = UserModel(**req)
@@ -35,9 +35,14 @@ class RegisterUser(MethodView):
             db.session.add(new_user)
             db.session.commit()
         except IntegrityError:
-            abort(409, message="User with such username already exists")
+            abort(409, message="User with such username or email already exists")
         except SQLAlchemyError as e:
             abort(500, message=e)
+        send_simple_message(
+            to=new_user.email,
+            subject="Successfully signed up",
+            body=f"Hello, {new_user.username} and welcome to stores REST API"
+        )
         return {"message": "Successfully created a user"}
 
 @blp.route("/login")

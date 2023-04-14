@@ -61,6 +61,8 @@ class StoreID(MethodView):
         try:
             db.session.delete(store)
             db.session.commit()
+        except IntegrityError:
+            abort(400, message="Can't delete a store with items or tags associated with it")
         except SQLAlchemyError as e:
             abort(500, message=str(e))
         return {"message": "Store successfully deleted"}
